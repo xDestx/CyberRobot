@@ -1,4 +1,3 @@
-
 import thread
 import time
 import threading
@@ -17,7 +16,8 @@ def control_robot(robot):
             self.spaces_right = -1
             
             self.tree = FractalTree()
-            self.currentTreePos = []
+            self.tree.addSubBranchAtLocation(Coord(0,0))
+            self.currentTreePos = [0]
             #Tree pos works as follows
             #[1 3 2 2]
             #Branch 1 (of subbranch array)
@@ -152,121 +152,189 @@ def control_robot(robot):
                     if(theMaze.find_coord_obj(self.x + xdiff, self.y + ydiff) == -1000):
                         theMaze.add_coord_obj(self.x + xdiff, self.y + ydiff)
         def doThing(self):
-            
-            self.alignedHorizontal = False
-            for i in range(0, len(self.virusList)):
-                tempCoord = self.virusList[i]
-                if(self.facing == 0 or self.facing == 2):
-                    if(tempCoord[0] == self.x):
-                        self.alignedHorizontal = True
-                else:
-                    if(tempCoord[1] == self.y):
-                        self.alignedHorizontal = True
-                        
-            if(len(self.closeVirusCoord) == 0):
-                self.findCloseVirus()
-                        
-            for i in range(0, len(self.virusList)):
-                tempCoord = self.virusList[i]
-                if(tempCoord[0] == self.x and tempCoord[1] == self.y):
-                    self.sense_virus()
-                    if(tempCoord[0] == self.closeVirusCoord[0] and tempCoord[1] == self.closeVirusCoord[1]):
-                        self.findCloseVirus()
-                    break
+            ThisMaze.currentData()
+            self.sense_three()
+            if(getIfDeadEnd()):
 
+            elif(spaces_left != 0 or spaces_right != 0):
+                for i in range(len(self.tree.currentBranch.subBranches)):
+                    print 'fuck'
                 
             
-                
-            cVX = self.closeVirusCoord[0]
-            cVY = self.closeVirusCoord[1]
-            aboveVal = 0
-            rightVal = 0
-            aboveVal = cVY-self.y
-            rightVal = cVX-self.x
-            directionArray = [-1,-1,-1,-1]
-            exception = False
-            if(aboveVal < rightVal):
-                if(aboveVal > 0):
-                    directionArray[0] = Direction.UP
-                    upUsed = True
-                elif (aboveVal < 0):
-                    directionArray[0] = Direction.DOWN
-                    downUsed = True
-                else:
-                    #On same y level
-                    directionArray[3] = Direction.DOWN
-                    directionArray[2] = Direction.UP
-                    exception = True
-                    if(rightVal > 0):
-                        directionArray[0] = Direction.RIGHT
-                        directionArray[1] = Direction.LEFT
-                    elif (rightVal < 0):
-                        directionArray[0] = Direction.LEFT
-                        directionARray[1] = Direction.RIGHT
-                if(upUsed):
-                    directionArray[1] = Direction.LEFT
-                else:
-                    directionArray[1] = Direction.RIGHT
-                directionArray[2] = Direction.UP
-                directionArray[3] = Direction.DOWN
-                if(rightVal > 0 and not exception):
-                    directionArray[1] = Direction.RIGHT
-                elif (rightVal < 0):
-                    directionArray[2] = Direction.LEFT
-                
-            else:
-                if(rightVal > 0):
-                    directionArray[1] = Direction.RIGHT
-                elif (rightVal < 0):
-                    directionArray[2] = Direction.LEFT
-                else:
-                    #On same x level
-                    directionArray[3] = Direction.RIGHT
-                    directionArray[2] = Direction.LEFT
-                    exception = True
-                    if(aboveVal > 0):
-                        directionArray[1] = Direction.UP
-                    elif (rightVal < 0):
-                        directionArray[2] = Direction.DOWN
-                if(aboveVal > 0 and not exception):
-                    directionArray[1] = Direction.UP
-                elif (aboveVal < 0):
-                    directionArray[2] = Direction.DOWN
-            finalDirection = -1;
-            disallowedDirections = set()
-            breakOut = False
-            for d in directionArray:
-                a = -1
-                if(d == Direction.UP):
-                    a = Coord(self.x, self.y+1)
-                elif(d == Direction.LEFT):
-                    a = Coord(self.x-1, self.y)
-                elif(d == Direction.DOWN):
-                    a = Coord(self.x, self.y-1)
-                else:
-                    a = Coord(self.x+1, self.y)
-                for p in self.paths:
-                    sp = p.getStartPosition()
-                    if(sp.x == a.x and sp.y == a.y):
-                        if(p.isDeadEnd()):
-                            #CANT GO THIS WAY BECAUSE IT IS A DEAD END!
-                            #SO DO NOTHING
-                            disallowedDirections.add(d)
-                        else:
-                            finalDirection = d
-                            breakOut = True
-                            break
-                if(breakOut):
-                    break
-            if (finalDirection == -1):
-                for d in directionArray:
-                    if(not (d in disallowedDirections)):
-                        finalDirection = d
-            if(finalDirection == -1):
-                print 'shit'
-            while(self.facing != finalDirection):
-                self.turn_left(1)
-            self.forward(1)
+##            self.alignedHorizontal = False
+##            for i in range(0, len(self.virusList)):
+##                tempCoord = self.virusList[i]
+##                if(self.facing == 0 or self.facing == 2):
+##                    if(tempCoord[0] == self.x):
+##                        self.alignedHorizontal = True
+##                else:
+##                    if(tempCoord[1] == self.y):
+##                        self.alignedHorizontal = True
+##                        
+##            if(len(self.closeVirusCoord) == 0):
+##                self.findCloseVirus()
+##                        
+##            for i in range(0, len(self.virusList)):
+##                tempCoord = self.virusList[i]
+##                if(tempCoord[0] == self.x and tempCoord[1] == self.y):
+##                    self.sense_virus()
+##                    if(tempCoord[0] == self.closeVirusCoord[0] and tempCoord[1] == self.closeVirusCoord[1]):
+##                        self.findCloseVirus()
+##                    break
+##
+##                
+##            
+##                
+##            cVX = self.closeVirusCoord[0]
+##            cVY = self.closeVirusCoord[1]
+##            aboveVal = 0
+##            rightVal = 0
+##            aboveVal = cVY-self.y
+##            rightVal = cVX-self.x
+##            directionArray = [-1,-1,-1,-1]
+##            exception = False
+##            if(aboveVal < rightVal):
+##                if(aboveVal > 0):
+##                    directionArray[0] = Direction.UP
+##                    upUsed = True
+##                elif (aboveVal < 0):
+##                    directionArray[0] = Direction.DOWN
+##                    downUsed = True
+##                else:
+##                    #On same y level
+##                    directionArray[3] = Direction.DOWN
+##                    directionArray[2] = Direction.UP
+##                    exception = True
+##                    if(rightVal > 0):
+##                        directionArray[0] = Direction.RIGHT
+##                        directionArray[1] = Direction.LEFT
+##                    elif (rightVal < 0):
+##                        directionArray[0] = Direction.LEFT
+##                        directionARray[1] = Direction.RIGHT
+##                if(upUsed):
+##                    directionArray[1] = Direction.LEFT
+##                else:
+##                    directionArray[1] = Direction.RIGHT
+##                directionArray[2] = Direction.UP
+##                directionArray[3] = Direction.DOWN
+##                if(rightVal > 0 and not exception):
+##                    directionArray[1] = Direction.RIGHT
+##                elif (rightVal < 0):
+##                    directionArray[2] = Direction.LEFT
+##                self.alignedHorizontal = False
+##            for i in range(0, len(self.virusList)):
+##                tempCoord = self.virusList[i]
+##                if(self.facing == 0 or self.facing == 2):
+##                    if(tempCoord[0] == self.x):
+##                        self.alignedHorizontal = True
+##                else:
+##                    if(tempCoord[1] == self.y):
+##                        self.alignedHorizontal = True
+##                        
+##            if(len(self.closeVirusCoord) == 0):
+##                self.findCloseVirus()
+##                        
+##            for i in range(0, len(self.virusList)):
+##                tempCoord = self.virusList[i]
+##                if(tempCoord[0] == self.x and tempCoord[1] == self.y):
+##                    self.sense_virus()
+##                    if(tempCoord[0] == self.closeVirusCoord[0] and tempCoord[1] == self.closeVirusCoord[1]):
+##                        self.findCloseVirus()
+##                    break
+##
+##                
+##            
+##                
+##            cVX = self.closeVirusCoord[0]
+##            cVY = self.closeVirusCoord[1]
+##            aboveVal = 0
+##            rightVal = 0
+##            aboveVal = cVY-self.y
+##            rightVal = cVX-self.x
+##            directionArray = [-1,-1,-1,-1]
+##            exception = False
+##            if(aboveVal < rightVal):
+##                if(aboveVal > 0):
+##                    directionArray[0] = Direction.UP
+##                    upUsed = True
+##                elif (aboveVal < 0):
+##                    directionArray[0] = Direction.DOWN
+##                    downUsed = True
+##                else:
+##                    #On same y level
+##                    directionArray[3] = Direction.DOWN
+##                    directionArray[2] = Direction.UP
+##                    exception = True
+##                    if(rightVal > 0):
+##                        directionArray[0] = Direction.RIGHT
+##                        directionArray[1] = Direction.LEFT
+##                    elif (rightVal < 0):
+##                        directionArray[0] = Direction.LEFT
+##                        directionARray[1] = Direction.RIGHT
+##                if(upUsed):
+##                    directionArray[1] = Direction.LEFT
+##                else:
+##                    directionArray[1] = Direction.RIGHT
+##                directionArray[2] = Direction.UP
+##                directionArray[3] = Direction.DOWN
+##                if(rightVal > 0 and not exception):
+##                    directionArray[1] = Direction.RIGHT
+##                elif (rightVal < 0):
+##                    directionArray[2] = Direction.LEFT
+##                
+##            else:
+##                if(rightVal > 0):
+##                    directionArray[1] = Direction.RIGHT
+##                elif (rightVal < 0):
+##                    directionArray[2] = Direction.LEFT
+##                else:
+##                    #On same x level
+##                    directionArray[3] = Direction.RIGHT
+##                    directionArray[2] = Direction.LEFT
+##                    exception = True
+##                    if(aboveVal > 0):
+##                        directionArray[1] = Direction.UP
+##                    elif (rightVal < 0):
+##                        directionArray[2] = Direction.DOWN
+##                if(aboveVal > 0 and not exception):
+##                    directionArray[1] = Direction.UP
+##                elif (aboveVal < 0):
+##                    directionArray[2] = Direction.DOWN
+##            finalDirection = -1;
+##            disallowedDirections = set()
+##            breakOut = False
+##            for d in directionArray:
+##                a = -1
+##                if(d == Direction.UP):
+##                    a = Coord(self.x, self.y+1)
+##                elif(d == Direction.LEFT):
+##                    a = Coord(self.x-1, self.y)
+##                elif(d == Direction.DOWN):
+##                    a = Coord(self.x, self.y-1)
+##                else:
+##                    a = Coord(self.x+1, self.y)
+##                for p in self.paths:
+##                    sp = p.getStartPosition()
+##                    if(sp.x == a.x and sp.y == a.y):
+##                        if(p.isDeadEnd()):
+##                            #CANT GO THIS WAY BECAUSE IT IS A DEAD END!
+##                            #SO DO NOTHING
+##                            disallowedDirections.add(d)
+##                        else:
+##                            finalDirection = d
+##                            breakOut = True
+##                            break
+##                if(breakOut):
+##                    break
+##            if (finalDirection == -1):
+##                for d in directionArray:
+##                    if(not (d in disallowedDirections)):
+##                        finalDirection = d
+##            if(finalDirection == -1):
+##                print 'shit'
+##            while(self.facing != finalDirection):
+##                self.turn_left(1)
+##            self.forward(1)
             
         def getIfDeadEnd(self):
             if(self.spaces_left == 0 and self.spaces_forward == 0 and self.spaces_right == 0):
@@ -390,9 +458,6 @@ def control_robot(robot):
     ThisMaze = Maze(OMHSBot)
     OMHSBot.sense_virus()
     while(True):
-        ThisMaze.currentData()
-        OMHSBot.sense_three()
         OMHSBot.doThing()
-        
     
     pass
