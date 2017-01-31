@@ -151,14 +151,21 @@ def control_robot(robot):
                         ydiff = xt * -1
                     if(theMaze.find_coord_obj(self.x + xdiff, self.y + ydiff) == -1000):
                         theMaze.add_coord_obj(self.x + xdiff, self.y + ydiff)
+        def getBranch(self, indexValues):
+            startingBranch =  self.tree.rootBranch
+            currentBranch = startingBranch.getBranch(0)
+            for i in range(len(indexValues)):
+                if(i+1 == len(indexValues)):
+                    return 0
+        #Return branch
         def doThing(self):
             ThisMaze.currentData()
             self.sense_three()
             if(getIfDeadEnd()):
-
+                print 'darn'
             elif(spaces_left != 0 or spaces_right != 0):
                 for i in range(len(self.tree.currentBranch.subBranches)):
-                    print 'fuck'
+                    print 'heck'
                 
             
 ##            self.alignedHorizontal = False
