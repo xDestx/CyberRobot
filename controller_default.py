@@ -15,8 +15,7 @@ def control_robot(robot):
             self.spaces_forward = -1
             self.spaces_right = -1
             
-            self.tree = FractalTree()
-            self.tree.addSubBranchAtLocation(Coord(0,0))
+            self.tree = FractalTree(self.facing)
             self.currentTreePos = [0]
             #Tree pos works as follows
             #[1 3 2 2]
@@ -161,194 +160,56 @@ def control_robot(robot):
         def doThing(self):
             ThisMaze.currentData()
             self.sense_three()
-            if(getIfDeadEnd()):
-                print 'darn'
-            elif(spaces_left != 0 or spaces_right != 0):
-                for i in range(len(self.tree.currentBranch.subBranches)):
-                    print 'heck'
+            while(self.spaces_forward == -1 or self.spaces_left == -1 or self.spaces_right == -1):
+                qer = 1
+            if(self.getIfDeadEnd()): #check if dead end. if so, return to origin of path / branch
+                #should go back to origin of branch
+                print "attempting to travel to origin of current path"
+                self.travelToOriginOfCurrentPath()
+            elif(self.spaces_left > 0 or self.spaces_right > 0): #check if it can go right or left. if so, check to see if there are current branches. Travel down the untravelled branches, make non-existant branches, etc.
+               ## for i in range(len(self.tree.currentBranch.subBranches)):
+                print 'heck'
+            else: #Only space is in front
+                self.forward(1)
                 
-            
-##            self.alignedHorizontal = False
-##            for i in range(0, len(self.virusList)):
-##                tempCoord = self.virusList[i]
-##                if(self.facing == 0 or self.facing == 2):
-##                    if(tempCoord[0] == self.x):
-##                        self.alignedHorizontal = True
-##                else:
-##                    if(tempCoord[1] == self.y):
-##                        self.alignedHorizontal = True
-##                        
-##            if(len(self.closeVirusCoord) == 0):
-##                self.findCloseVirus()
-##                        
-##            for i in range(0, len(self.virusList)):
-##                tempCoord = self.virusList[i]
-##                if(tempCoord[0] == self.x and tempCoord[1] == self.y):
-##                    self.sense_virus()
-##                    if(tempCoord[0] == self.closeVirusCoord[0] and tempCoord[1] == self.closeVirusCoord[1]):
-##                        self.findCloseVirus()
-##                    break
-##
-##                
-##            
-##                
-##            cVX = self.closeVirusCoord[0]
-##            cVY = self.closeVirusCoord[1]
-##            aboveVal = 0
-##            rightVal = 0
-##            aboveVal = cVY-self.y
-##            rightVal = cVX-self.x
-##            directionArray = [-1,-1,-1,-1]
-##            exception = False
-##            if(aboveVal < rightVal):
-##                if(aboveVal > 0):
-##                    directionArray[0] = Direction.UP
-##                    upUsed = True
-##                elif (aboveVal < 0):
-##                    directionArray[0] = Direction.DOWN
-##                    downUsed = True
-##                else:
-##                    #On same y level
-##                    directionArray[3] = Direction.DOWN
-##                    directionArray[2] = Direction.UP
-##                    exception = True
-##                    if(rightVal > 0):
-##                        directionArray[0] = Direction.RIGHT
-##                        directionArray[1] = Direction.LEFT
-##                    elif (rightVal < 0):
-##                        directionArray[0] = Direction.LEFT
-##                        directionARray[1] = Direction.RIGHT
-##                if(upUsed):
-##                    directionArray[1] = Direction.LEFT
-##                else:
-##                    directionArray[1] = Direction.RIGHT
-##                directionArray[2] = Direction.UP
-##                directionArray[3] = Direction.DOWN
-##                if(rightVal > 0 and not exception):
-##                    directionArray[1] = Direction.RIGHT
-##                elif (rightVal < 0):
-##                    directionArray[2] = Direction.LEFT
-##                self.alignedHorizontal = False
-##            for i in range(0, len(self.virusList)):
-##                tempCoord = self.virusList[i]
-##                if(self.facing == 0 or self.facing == 2):
-##                    if(tempCoord[0] == self.x):
-##                        self.alignedHorizontal = True
-##                else:
-##                    if(tempCoord[1] == self.y):
-##                        self.alignedHorizontal = True
-##                        
-##            if(len(self.closeVirusCoord) == 0):
-##                self.findCloseVirus()
-##                        
-##            for i in range(0, len(self.virusList)):
-##                tempCoord = self.virusList[i]
-##                if(tempCoord[0] == self.x and tempCoord[1] == self.y):
-##                    self.sense_virus()
-##                    if(tempCoord[0] == self.closeVirusCoord[0] and tempCoord[1] == self.closeVirusCoord[1]):
-##                        self.findCloseVirus()
-##                    break
-##
-##                
-##            
-##                
-##            cVX = self.closeVirusCoord[0]
-##            cVY = self.closeVirusCoord[1]
-##            aboveVal = 0
-##            rightVal = 0
-##            aboveVal = cVY-self.y
-##            rightVal = cVX-self.x
-##            directionArray = [-1,-1,-1,-1]
-##            exception = False
-##            if(aboveVal < rightVal):
-##                if(aboveVal > 0):
-##                    directionArray[0] = Direction.UP
-##                    upUsed = True
-##                elif (aboveVal < 0):
-##                    directionArray[0] = Direction.DOWN
-##                    downUsed = True
-##                else:
-##                    #On same y level
-##                    directionArray[3] = Direction.DOWN
-##                    directionArray[2] = Direction.UP
-##                    exception = True
-##                    if(rightVal > 0):
-##                        directionArray[0] = Direction.RIGHT
-##                        directionArray[1] = Direction.LEFT
-##                    elif (rightVal < 0):
-##                        directionArray[0] = Direction.LEFT
-##                        directionARray[1] = Direction.RIGHT
-##                if(upUsed):
-##                    directionArray[1] = Direction.LEFT
-##                else:
-##                    directionArray[1] = Direction.RIGHT
-##                directionArray[2] = Direction.UP
-##                directionArray[3] = Direction.DOWN
-##                if(rightVal > 0 and not exception):
-##                    directionArray[1] = Direction.RIGHT
-##                elif (rightVal < 0):
-##                    directionArray[2] = Direction.LEFT
-##                
-##            else:
-##                if(rightVal > 0):
-##                    directionArray[1] = Direction.RIGHT
-##                elif (rightVal < 0):
-##                    directionArray[2] = Direction.LEFT
-##                else:
-##                    #On same x level
-##                    directionArray[3] = Direction.RIGHT
-##                    directionArray[2] = Direction.LEFT
-##                    exception = True
-##                    if(aboveVal > 0):
-##                        directionArray[1] = Direction.UP
-##                    elif (rightVal < 0):
-##                        directionArray[2] = Direction.DOWN
-##                if(aboveVal > 0 and not exception):
-##                    directionArray[1] = Direction.UP
-##                elif (aboveVal < 0):
-##                    directionArray[2] = Direction.DOWN
-##            finalDirection = -1;
-##            disallowedDirections = set()
-##            breakOut = False
-##            for d in directionArray:
-##                a = -1
-##                if(d == Direction.UP):
-##                    a = Coord(self.x, self.y+1)
-##                elif(d == Direction.LEFT):
-##                    a = Coord(self.x-1, self.y)
-##                elif(d == Direction.DOWN):
-##                    a = Coord(self.x, self.y-1)
-##                else:
-##                    a = Coord(self.x+1, self.y)
-##                for p in self.paths:
-##                    sp = p.getStartPosition()
-##                    if(sp.x == a.x and sp.y == a.y):
-##                        if(p.isDeadEnd()):
-##                            #CANT GO THIS WAY BECAUSE IT IS A DEAD END!
-##                            #SO DO NOTHING
-##                            disallowedDirections.add(d)
-##                        else:
-##                            finalDirection = d
-##                            breakOut = True
-##                            break
-##                if(breakOut):
-##                    break
-##            if (finalDirection == -1):
-##                for d in directionArray:
-##                    if(not (d in disallowedDirections)):
-##                        finalDirection = d
-##            if(finalDirection == -1):
-##                print 'shit'
-##            while(self.facing != finalDirection):
-##                self.turn_left(1)
-##            self.forward(1)
-            
+                
         def getIfDeadEnd(self):
+            print self.spaces_left , "  " , self.spaces_forward , "  " , self.spaces_right
             if(self.spaces_left == 0 and self.spaces_forward == 0 and self.spaces_right == 0):
                 self.deadEndSpaces.append(Coord(self.x, self.y))
                 return True
             else:
                 return False
+            
+        def travelToOriginOfCurrentPath(self):
+            currentBranch = []
+            currentBrach = self.tree.getRootBranch()
+            print currentBranch
+            for i in range (len(self.currentTreePos)):
+                currentBranch = currentBranch.getBranch(self.currentTreePos[i])
+            for i in range (len(currentBranch.coordArray)-1):
+                v = len(currentBranch.coordArray) - 1 - (i+1)
+                currentCoord = currentBranch.coordArray[v]
+                if(getRelativeXDirectionToCoord(currentCoord) > 0):
+                    ##point is to the right of robot
+                    self.turn_right(1)
+                    self.forward(1)
+                elif (getRelativeXDirectionToCoord(currentCoord) < 0):
+                    ##Point is  to the left
+                    self.turn_left(1)
+                    self.forward(1)
+                elif (getRelativeYDirectionToCoord(currentCoord) > 0):
+                    ##Point is in front (weird)
+                    self.forward(1)
+                elif (getRelativeYDirectionToCoord(currentCoord) < 0):
+                    self.back(1)
+                else:
+                    print "!!!!!MAYDAY!!!!!"
+                
+        def getRelativeXDirectionToCoord(self, coord):
+            return self.x - coord.x
+        def getRelativeYDirectionToCoord(self, coord):
+            return self.y - coord.y
 ############################################################            
     class Coord():
         def __init__(self, x_val, y_val):
@@ -412,20 +273,25 @@ def control_robot(robot):
             return -1000
 ############################################################
     class FractalTree():
-        def __init__(self):
-            self.rootBranch = []
+        def __init__(self, facing):
+            self.rootBranch = FractalBranch(Coord(0,0), facing)
+        
+        def getRootBranch(self):
+            return self.rootBranch
             
 ############################################################ 
     class FractalBranch():
-        def __init__(self):
+        def __init__(self, facing):
             self.subBranches = []
             self.coordArray = []
             self.decisionCoords = []
-        def __init__(self, coord):
+            self.originalDirection = facing
+        def __init__(self, coord, facing):
             self.subBranches = []
             self.coordArray = []
             self.decisionCoords = []
             self.startCoord = coord
+            self.originalDirection = facing
         def add(self, coord):
             self.coordArray.append(coord)
         def split_path(self):
@@ -435,7 +301,7 @@ def control_robot(robot):
             return coordArray[0]
         def addSubBranchAtLocation(self, c):
             ##c is a coord object
-             self.subBranches.append(FractalBranch(c))
+             self.subBranches.append(FractalBranch(c, self.facing))
 
         def getBranch(self, num):
             return subBranches[num]
