@@ -16,7 +16,7 @@ def control_robot(robot):
             self.spaces_right = -1
             
             self.tree = FractalTree(self.facing)
-            self.currentTreePos = [0]
+            self.currentTreePos = []
             #Tree pos works as follows
             #[1 3 2 2]
             #Branch 1 (of subbranch array)
@@ -41,8 +41,9 @@ def control_robot(robot):
                 self.y = self.y - dist
             else:
                 self.x = self.x + dist
+            self.getCurrentBranch().coordArray.append(Coord(self.x,self.y))
                 
-        def back(self, distance):
+        def back(self, dist):
             if (len(self.virusList) == 0):
                 self.virusList = self.sense_virus()
             robot.step_backward(dist)
@@ -169,6 +170,11 @@ def control_robot(robot):
             elif(self.spaces_left > 0 or self.spaces_right > 0): #check if it can go right or left. if so, check to see if there are current branches. Travel down the untravelled branches, make non-existant branches, etc.
                ## for i in range(len(self.tree.currentBranch.subBranches)):
                 print 'heck'
+                #check left first, then right
+                if(self.spaces_left > 0):
+                    #make method to check if origin of any path is here
+                    print 'help'
+                    
             else: #Only space is in front
                 self.forward(1)
                 
@@ -181,35 +187,43 @@ def control_robot(robot):
             else:
                 return False
             
-        def travelToOriginOfCurrentPath(self):
-            currentBranch = []
-            currentBrach = self.tree.getRootBranch()
-            print currentBranch
+            
+        def getCurrentBranch(self):
+            currentBranch = self.tree.getRootBranch()
+            ## self.tree.getRootBranch(), " AAAAAAAAAAAAAA"
             for i in range (len(self.currentTreePos)):
                 currentBranch = currentBranch.getBranch(self.currentTreePos[i])
+            return currentBranch
+        
+        def travelToOriginOfCurrentPath(self):
+            currentBranch = self.getCurrentBranch()
             for i in range (len(currentBranch.coordArray)-1):
                 v = len(currentBranch.coordArray) - 1 - (i+1)
                 currentCoord = currentBranch.coordArray[v]
-                if(getRelativeXDirectionToCoord(currentCoord) > 0):
+                if(self.getRelativeXDirectionToCoord(currentCoord) > 0):
                     ##point is to the right of robot
                     self.turn_right(1)
                     self.forward(1)
-                elif (getRelativeXDirectionToCoord(currentCoord) < 0):
+                    print"aaa"
+                elif (self.getRelativeXDirectionToCoord(currentCoord) < 0):
                     ##Point is  to the left
                     self.turn_left(1)
                     self.forward(1)
-                elif (getRelativeYDirectionToCoord(currentCoord) > 0):
+                    print"bbb"
+                elif (self.getRelativeYDirectionToCoord(currentCoord) > 0):
                     ##Point is in front (weird)
                     self.forward(1)
-                elif (getRelativeYDirectionToCoord(currentCoord) < 0):
+                    print "ccc"
+                elif (self.getRelativeYDirectionToCoord(currentCoord) < 0):
                     self.back(1)
+                    print "ddd"
                 else:
                     print "!!!!!MAYDAY!!!!!"
                 
         def getRelativeXDirectionToCoord(self, coord):
             return self.x - coord.x
         def getRelativeYDirectionToCoord(self, coord):
-            return self.y - coord.y
+            return  coord.y - self.y
 ############################################################            
     class Coord():
         def __init__(self, x_val, y_val):
@@ -288,7 +302,7 @@ def control_robot(robot):
             self.originalDirection = facing
         def __init__(self, coord, facing):
             self.subBranches = []
-            self.coordArray = []
+            self.coordArray = [coord]
             self.decisionCoords = []
             self.startCoord = coord
             self.originalDirection = facing
