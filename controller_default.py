@@ -41,7 +41,11 @@ def control_robot(robot):
                 self.y = self.y - dist
             else:
                 self.x = self.x + dist
-            self.getCurrentBranch().coordArray.append(Coord(self.x,self.y))
+            if(ThisMaze.find_coord_obj(self.x,self.y) == -1000):
+                newCoord = Coord(self.x,self.y,self.facing)
+                self.getCurrentBranch().coordArray.append(newCoord)
+                ThisMaze.coordList.append(newCoord)
+                print"I AM ADDING FORWARDDDDDDDDDDDDDDDD"
                 
         def back(self, dist):
             if (len(self.virusList) == 0):
@@ -55,6 +59,10 @@ def control_robot(robot):
                 self.y = self.y + dist
             else:
                 self.x = self.x - dist
+            if(ThisMaze.find_coord_obj(self.x,self.y) == -1000):
+                newCoord = Coord(self.x,self.y,self.facing)
+                self.getCurrentBranch().coordArray.append(newCoord)
+                ThisMaze.coordList.append(newCoord)
                 
         def turn_left(self, times):
             for i in range(times):
@@ -128,7 +136,7 @@ def control_robot(robot):
         
         def create_for_direction(self, theMaze):
             if(theMaze.find_coord_obj(self.x, self.y) == -1000):
-                        theMaze.add_coord_obj(self.x, self.y)
+                        theMaze.add_coord_obj(self.x, self.y, self.facing)
             spaces = [self.spaces_left, self.spaces_right, self.spaces_forward]
             for x in range (0,3):
                 for i in range(0, int(spaces[x])):
@@ -150,7 +158,7 @@ def control_robot(robot):
                         xdiff = yt
                         ydiff = xt * -1
                     if(theMaze.find_coord_obj(self.x + xdiff, self.y + ydiff) == -1000):
-                        theMaze.add_coord_obj(self.x + xdiff, self.y + ydiff)
+                        theMaze.add_coord_obj(self.x + xdiff, self.y + ydiff, self.facing)
         def getBranch(self, indexValues):
             startingBranch =  self.tree.rootBranch
             currentBranch = startingBranch.getBranch(0)
@@ -165,24 +173,126 @@ def control_robot(robot):
                 qer = 1
             if(self.getIfDeadEnd()): #check if dead end. if so, return to origin of path / branch
                 #should go back to origin of branch
-                print "attempting to travel to origin of current path"
-                self.travelToOriginOfCurrentPath()
+                print "dead end, checking if space behind has not been traveled"
+                index = self.getCoordBehindRobot(ThisMaze)
+                if(index == -1000):
+                    print "WOW THE COORD BEHIND THE ROBOT IS FREE TO EXPLOOOOOOOOOOOORE"    
+                else:
+                    print "attempting to travel to origin of current path"
+                    self.travelToOriginOfCurrentPath()
             elif(self.spaces_left > 0 or self.spaces_right > 0): #check if it can go right or left. if so, check to see if there are current branches. Travel down the untravelled branches, make non-existant branches, etc.
                ## for i in range(len(self.tree.currentBranch.subBranches)):
                 print 'heck'
                 #check left first, then right
                 if(self.spaces_left > 0):
-                    #make method to check if origin of any path is here
-                    print 'help'
+                    index = self.getCoordLeftOfRobot(ThisMaze)
+                    if(index == -1000):
+                        branchId = getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
+                        currentTreePos.append(branchId)
+                        self.turn_left(1)
+                        self.forward(1)
+                    else:
+                        print'dont want to do that haha'
+                    #if coordinate to left of robot is not traveled
+                    #####create a new branch using that coordinate as the origin
+                    #else
+                    #####ignore that position
                     
+                    print 'space left'
+                    
+                elif (self.spaces_right > 0):
+                    index = self.getCoordLeftOfRobot(ThisMaze)
+                    if(index == -1000):
+                        branchId = getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
+                        currentTreePos.append(branchId)
+                        self.turn_left(1)
+                        self.forward(1)
+                    else:
+                        print'dont want to do that haha'
+                    #if coordinate to left of robot is not traveled
+                    #####create a new branch using that coordinate as the origin
+                    #else
+                    #####ignore that position
+                    
+                    print 'space left'
+                    
+                
             else: #Only space is in front
                 self.forward(1)
                 
                 
+        def getCoordRightOfRobot(self,maze):
+            if(self.facing == 0):
+                posX = self.x + 1 
+                posY = self.y
+            elif(self.facing == 1):
+                posX = self.x
+                posY = self.y -1 
+            elif(self.facing == 2):
+                posX = self.x -1
+                posY = self.y 
+            else:
+                posX = self.x
+                posY = self.y + 1
+            return maze.find_coord_obj(posX, posY)
+        def getCoordInFrontOfRobot(self,maze):
+            if(self.facing == 0):
+                posX = self.x 
+                posY = self.y +1
+            elif(self.facing == 1):
+                posX = self.x +1
+                posY = self.y 
+            elif(self.facing == 2):
+                posX = self.x
+                posY = self.y - 1
+            else:
+                posX = self.x - 1 
+                posY = self.y
+            return maze.find_coord_obj(posX, posY)
+        def getCoordBehindRobot(self,maze):
+            if(self.facing == 0):
+                posX = self.x 
+                posY = self.y -1
+            elif(self.facing == 1):
+                posX = self.x -1
+                posY = self.y 
+            elif(self.facing == 2):
+                posX = self.x
+                posY = self.y + 1
+            else:
+                posX = self.x + 1 
+                posY = self.y
+            return maze.find_coord_obj(posX, posY)
+        
+        def getCoordLeftOfRobot(self, maze):
+            if(self.facing == 0):
+                posX = self.x - 1
+                posY = self.y
+            elif(self.facing == 1):
+                posX = self.x
+                posY = self.y +1
+            elif(self.facing == 2):
+                posX = self.x + 1
+                posY = self.y
+            else:
+                posX = self.x 
+                posY = self.y-1
+            return maze.find_coord_obj(posX, posY)
+            
+        #
+        #
+        #
+        # To do: in addition to checking dead end, check for dead branch
+        #        
+        #
+        #
+        #
+        #
+                
         def getIfDeadEnd(self):
             print self.spaces_left , "  " , self.spaces_forward , "  " , self.spaces_right
             if(self.spaces_left == 0 and self.spaces_forward == 0 and self.spaces_right == 0):
-                self.deadEndSpaces.append(Coord(self.x, self.y))
+                self.deadEndSpaces.append(Coord(self.x, self.y, self.facing))
                 return True
             else:
                 return False
@@ -226,11 +336,12 @@ def control_robot(robot):
             return  coord.y - self.y
 ############################################################            
     class Coord():
-        def __init__(self, x_val, y_val):
+        def __init__(self, x_val, y_val, direction):
             self.isDecision = False
             self.x = x_val
             self.y = y_val
             self.name = 'Position: (', self.x, ',', self.y, ')'
+            self.directionTravelled = direction
 ############################################################            
     class Wall():
         def __init__(self, orientation, val_pos, val_const):
@@ -276,8 +387,8 @@ def control_robot(robot):
             print ""
             self.counter = self.counter + 1
             
-        def add_coord_obj(self, c_x, c_y):
-            self.coordList.append(Coord(c_x, c_y))
+        def add_coord_obj(self, c_x, c_y, dir):
+            self.coordList.append(Coord(c_x, c_y, dir))
 
                 
         def find_coord_obj(self, c_x, c_y):
@@ -288,7 +399,7 @@ def control_robot(robot):
 ############################################################
     class FractalTree():
         def __init__(self, facing):
-            self.rootBranch = FractalBranch(Coord(0,0), facing)
+            self.rootBranch = FractalBranch(Coord(0,0,facing), facing)
         
         def getRootBranch(self):
             return self.rootBranch
@@ -316,6 +427,7 @@ def control_robot(robot):
         def addSubBranchAtLocation(self, c):
             ##c is a coord object
              self.subBranches.append(FractalBranch(c, self.facing))
+             return len(subBranches)
 
         def getBranch(self, num):
             return subBranches[num]
