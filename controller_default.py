@@ -187,7 +187,7 @@ def control_robot(robot):
                 if(self.spaces_left > 0):
                     index = self.getCoordLeftOfRobot(ThisMaze)
                     if(index == -1000):
-                        branchId = getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
+                        branchId = self.getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
                         currentTreePos.append(branchId)
                         self.turn_left(1)
                         self.forward(1)
@@ -203,7 +203,7 @@ def control_robot(robot):
                 elif (self.spaces_right > 0):
                     index = self.getCoordLeftOfRobot(ThisMaze)
                     if(index == -1000):
-                        branchId = getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
+                        branchId = self.getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
                         currentTreePos.append(branchId)
                         self.turn_left(1)
                         self.forward(1)
@@ -216,10 +216,51 @@ def control_robot(robot):
                     
                     print 'space left'
                     
-                
+            
+            elif (self.getCoordBehindRobot(ThisMaze) == -1000 and self.check3Dead()):
+                ##Space behind hasn't been explored and not at dead end
+                print 'placeholder'
+                self.turn_left(2)
             else: #Only space is in front
                 self.forward(1)
                 
+                
+            #CHECKS LEFT RIGHT AND FORWARD FOR EXPLORED    
+        def check3Dead(self):
+            if(self.spaces_left == 0 and self.spaces_right == 0 and self.spaces_forward == 0):
+                print "THE GODS HAVE SPOKEEN"
+                return True
+            all3dead = True
+            sidesChecked = [0,0,0]
+            leftCoord = self.getCoordLeftOfRobot(ThisMaze)
+            frontCoord = self.getCoordInFrontOfRobot(ThisMaze)
+            rightCoord = self.getCoordRightOfRobot(ThisMaze)
+            for i in range (len(self.getCurrentBranch().subBranches)):
+                if(self.getCurrentBranch().subBranches[i].coordArray[0].equals(leftCoord)):
+                    sidesChecked[0] = 1
+                if (self.getCurrentBranch().subBranches[i].coordArray[0].equals(frontCoord)):
+                    sidesChecked[1] = 1
+                if(self.getCurrentBranch().subBranches[i].coordArray[0].equals(rightCoord)):
+                    sidesChecked[2] = 1
+                if(self.getCurrentBranch().subBranches[i].isExplored == False):
+                    print "CURRENT BRANCH IS NOT EXPLORED"
+                    return False
+            #print "STILL UNEXPLORED BRANCHES"
+            if(len(self.getCurrentBranch().subBranches) < 3):
+                if(self.spaces_left != 0 and sidesChecked[0] == 0):
+                    all3dead = False
+                    print"q"
+                elif(self.spaces_right != 0 and sidesChecked[2] == 0):
+                    all3dead = False
+                    print"r"
+                elif(self.spaces_forward != 0 and sidesChecked[1] == 0):
+                    all3dead = False
+                    print "s"
+                else:
+                    print "t"
+                
+                
+            return all3dead
                 
         def getCoordRightOfRobot(self,maze):
             if(self.facing == 0):
@@ -329,6 +370,7 @@ def control_robot(robot):
                     print "ddd"
                 else:
                     print "!!!!!MAYDAY!!!!!"
+            currentBranch.isExplored = True
                 
         def getRelativeXDirectionToCoord(self, coord):
             return self.x - coord.x
@@ -342,6 +384,8 @@ def control_robot(robot):
             self.y = y_val
             self.name = 'Position: (', self.x, ',', self.y, ')'
             self.directionTravelled = direction
+        def equals(self, coord):
+            return coord.x == self.x and coord.y == self.y
 ############################################################            
     class Wall():
         def __init__(self, orientation, val_pos, val_const):
@@ -403,6 +447,7 @@ def control_robot(robot):
         
         def getRootBranch(self):
             return self.rootBranch
+
             
 ############################################################ 
     class FractalBranch():
@@ -411,12 +456,14 @@ def control_robot(robot):
             self.coordArray = []
             self.decisionCoords = []
             self.originalDirection = facing
+            self.isExplored = False
         def __init__(self, coord, facing):
             self.subBranches = []
             self.coordArray = [coord]
             self.decisionCoords = []
             self.startCoord = coord
             self.originalDirection = facing
+            self.isExplored = False
         def add(self, coord):
             self.coordArray.append(coord)
         def split_path(self):
