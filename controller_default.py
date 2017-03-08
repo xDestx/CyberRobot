@@ -235,7 +235,14 @@ def control_robot(robot):
             leftCoord = self.getCoordLeftOfRobot(ThisMaze)
             frontCoord = self.getCoordInFrontOfRobot(ThisMaze)
             rightCoord = self.getCoordRightOfRobot(ThisMaze)
+            if(leftCoord != -1000):
+                leftCoord = ThisMaze.coordList[leftCoord]
+            if(rightCoord != -1000):
+                rightCoord = ThisMaze.coordList[rightCoord]
+            if(frontCoord != -1000):
+                frontCoord = ThisMaze.coordList[frontCoord]
             for i in range (len(self.getCurrentBranch().subBranches)):
+                print "L COORD " , self.printCoord(leftCoord) , " R COORD " , self.printCoord(rightCoord) , " F COORD " , self.printCoord(frontCoord) , " CURRENT BRANCH SUB BRANCH COORD " , self.printCoord(self.getCurrentBranch().subBranches[i].coordArray[0])
                 if(self.getCurrentBranch().subBranches[i].coordArray[0].equals(leftCoord)):
                     sidesChecked[0] = 1
                 if (self.getCurrentBranch().subBranches[i].coordArray[0].equals(frontCoord)):
@@ -249,19 +256,25 @@ def control_robot(robot):
             if(len(self.getCurrentBranch().subBranches) < 3):
                 if(self.spaces_left != 0 and sidesChecked[0] == 0):
                     all3dead = False
-                    print"q"
+                    print"qqqqqqq"
                 elif(self.spaces_right != 0 and sidesChecked[2] == 0):
                     all3dead = False
-                    print"r"
+                    print"rrrrrrr"
                 elif(self.spaces_forward != 0 and sidesChecked[1] == 0):
                     all3dead = False
-                    print "s"
+                    print "ssssss"
                 else:
-                    print "t"
+                    print "tttttt"
                 
                 
             return all3dead
-                
+        
+        
+        def printCoord(self, coord):
+            if(coord == -1000):
+                return "",-1000
+            return coord.toString()
+           
         def getCoordRightOfRobot(self,maze):
             if(self.facing == 0):
                 posX = self.x + 1 
@@ -323,7 +336,8 @@ def control_robot(robot):
         #
         #
         #
-        # To do: in addition to checking dead end, check for dead branch
+        # To do: When creating branch, create it on the position it starts, not the original position the decision is made from
+        #  OR just check the second coord in the array (temp fix?)
         #        
         #
         #
@@ -337,7 +351,11 @@ def control_robot(robot):
                 return True
             else:
                 return False
-            
+        
+        def createNewSubBranch(self):
+            branch = self.getCurrentBranch()
+            branch.addSubBranchAtLocation(Coord(self.x,self.y,self.facing))
+            self.currentTreePos.append(len(branch.subBranches)-1)
             
         def getCurrentBranch(self):
             currentBranch = self.tree.getRootBranch()
@@ -371,6 +389,11 @@ def control_robot(robot):
                 else:
                     print "!!!!!MAYDAY!!!!!"
             currentBranch.isExplored = True
+            newArray = []
+            #moves back one position on tree
+            for i in range (len(self.currentTreePos)-2):
+                newArray.append(self.currentTreePos[i])
+            self.currentTreePos = newArray
                 
         def getRelativeXDirectionToCoord(self, coord):
             return self.x - coord.x
@@ -385,7 +408,11 @@ def control_robot(robot):
             self.name = 'Position: (', self.x, ',', self.y, ')'
             self.directionTravelled = direction
         def equals(self, coord):
+            if(coord == -1000):
+                return False
             return coord.x == self.x and coord.y == self.y
+        def toString(self):
+            return "x: ", self.x, ", ", self.y
 ############################################################            
     class Wall():
         def __init__(self, orientation, val_pos, val_const):
@@ -473,11 +500,11 @@ def control_robot(robot):
             return coordArray[0]
         def addSubBranchAtLocation(self, c):
             ##c is a coord object
-             self.subBranches.append(FractalBranch(c, self.facing))
-             return len(subBranches)
+             self.subBranches.append(FractalBranch(c, c.directionTravelled))
+             return len(self.subBranches)
 
         def getBranch(self, num):
-            return subBranches[num]
+            return self.subBranches[num]
         def isAbsDeadEnd(self, deadEndPos):
             checkBool = True
             for x in (len(subBranches)):
@@ -503,6 +530,7 @@ def control_robot(robot):
     OMHSBot = MazeBot()
     ThisMaze = Maze(OMHSBot)
     OMHSBot.sense_virus()
+    OMHSBot.createNewSubBranch()
     while(True):
         OMHSBot.doThing()
     
