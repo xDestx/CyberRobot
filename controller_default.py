@@ -188,9 +188,10 @@ def control_robot(robot):
                     index = self.getCoordLeftOfRobot(ThisMaze)
                     if(index == -1000):
                         branchId = self.getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
-                        currentTreePos.append(branchId)
+                        currentTreePos.append(branchId-1)
                         self.turn_left(1)
                         self.forward(1)
+                        print 'to the front'
                     else:
                         print'dont want to do that haha'
                     #if coordinate to left of robot is not traveled
@@ -203,9 +204,9 @@ def control_robot(robot):
                 elif (self.spaces_right > 0):
                     index = self.getCoordLeftOfRobot(ThisMaze)
                     if(index == -1000):
-                        branchId = self.getCurrentBranch().addSubBranchAtLocation(Coord((self.x,self.y,self.facing)))
-                        currentTreePos.append(branchId)
-                        self.turn_left(1)
+                        branchId = self.getCurrentBranch().addSubBranchAtLocation(Coord(self.x,self.y,self.facing))
+                        self.currentTreePos.append(branchId-1)
+                        self.turn_right(1)
                         self.forward(1)
                     else:
                         print'dont want to do that haha'
@@ -214,7 +215,7 @@ def control_robot(robot):
                     #else
                     #####ignore that position
                     
-                    print 'space left'
+                    print 'space right'
                     
             
             elif (self.getCoordBehindRobot(ThisMaze) == -1000 and self.check3Dead()):
@@ -223,7 +224,7 @@ def control_robot(robot):
                 self.turn_left(2)
             else: #Only space is in front
                 self.forward(1)
-                
+            
                 
             #CHECKS LEFT RIGHT AND FORWARD FOR EXPLORED    
         def check3Dead(self):
@@ -243,11 +244,11 @@ def control_robot(robot):
                 frontCoord = ThisMaze.coordList[frontCoord]
             for i in range (len(self.getCurrentBranch().subBranches)):
                 print "L COORD " , self.printCoord(leftCoord) , " R COORD " , self.printCoord(rightCoord) , " F COORD " , self.printCoord(frontCoord) , " CURRENT BRANCH SUB BRANCH COORD " , self.printCoord(self.getCurrentBranch().subBranches[i].coordArray[0])
-                if(self.getCurrentBranch().subBranches[i].coordArray[0].equals(leftCoord)):
+                if(self.getCurrentBranch().subBranches[i].coordArray[1].equals(leftCoord)):
                     sidesChecked[0] = 1
-                if (self.getCurrentBranch().subBranches[i].coordArray[0].equals(frontCoord)):
+                if (self.getCurrentBranch().subBranches[i].coordArray[1].equals(frontCoord)):
                     sidesChecked[1] = 1
-                if(self.getCurrentBranch().subBranches[i].coordArray[0].equals(rightCoord)):
+                if(self.getCurrentBranch().subBranches[i].coordArray[1].equals(rightCoord)):
                     sidesChecked[2] = 1
                 if(self.getCurrentBranch().subBranches[i].isExplored == False):
                     print "CURRENT BRANCH IS NOT EXPLORED"
@@ -272,7 +273,7 @@ def control_robot(robot):
         
         def printCoord(self, coord):
             if(coord == -1000):
-                return "",-1000
+                return "-1000"
             return coord.toString()
            
         def getCoordRightOfRobot(self,maze):
@@ -336,9 +337,7 @@ def control_robot(robot):
         #
         #
         #
-        # To do: When creating branch, create it on the position it starts, not the original position the decision is made from
-        #  OR just check the second coord in the array (temp fix?)
-        #        
+        # To do: Travel to origin of path is not working correctly
         #
         #
         #
@@ -369,6 +368,7 @@ def control_robot(robot):
             for i in range (len(currentBranch.coordArray)-1):
                 v = len(currentBranch.coordArray) - 1 - (i+1)
                 currentCoord = currentBranch.coordArray[v]
+                self.printCoord(currentCoord)
                 if(self.getRelativeXDirectionToCoord(currentCoord) > 0):
                     ##point is to the right of robot
                     self.turn_right(1)
